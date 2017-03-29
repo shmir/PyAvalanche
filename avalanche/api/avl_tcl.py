@@ -18,13 +18,15 @@ else:
 class AvlTclWrapper(TgnTclWrapper):
     """ STC Python API over Tcl interpreter. """
 
-    def __init__(self, logger, avl_install_dir, tcl_interp=None):
+    def __init__(self, logger, tcl_lib_install_dir, avl_install_dir, tcl_interp=None):
         super(self.__class__, self).__init__(logger, tcl_interp)
+        tcl_lib_85_dir = tcl_file_name(path.join(tcl_lib_install_dir, 'tcl8.5'))
+        self.eval('set auto_path [linsert $auto_path 0 {} {}]'.format(tcl_lib_install_dir, tcl_lib_85_dir))
         self.eval('lappend auto_path ' + tcl_file_name(path.join(avl_install_dir, app_subdir)))
         self.eval('package forget av')
         self.ver = self.eval('package require av')
 
-    def stc_command(self, command, *attributes):
+    def avl_command(self, command, *attributes):
         return self.eval('av::' + command + ' ' + ' '.join(attributes))
 
     #
@@ -33,7 +35,7 @@ class AvlTclWrapper(TgnTclWrapper):
 
     def apply(self):
         """ Sends a test configuration to the Spirent TestCenter chassis. """
-        self.stc_command('apply')
+        self.avl_command('apply')
 
     def config(self, obj_ref, **attributes):
         """ Set or modifies one or more object attributes, or a relation.
@@ -42,7 +44,7 @@ class AvlTclWrapper(TgnTclWrapper):
         :param attributes: dictionary of {attributes: values} to configure.
         """
 
-        self.stc_command('config', obj_ref, get_args_pairs(attributes))
+        self.avl_command('config', obj_ref, get_args_pairs(attributes))
 
     def create(self, obj_type, parent, **attributes):
         """ Creates one or more Spirent TestCenter Automation objects.
@@ -53,7 +55,7 @@ class AvlTclWrapper(TgnTclWrapper):
         :return: STC object reference.
         """
 
-        return self.stc_command('create ' + obj_type + ' -under ' + parent.obj_ref(),
+        return self.avl_command('create ' + obj_type + ' -under ' + parent.obj_ref(),
                                 get_args_pairs(attributes))
 
     def delete(self, obj_ref):
@@ -62,7 +64,7 @@ class AvlTclWrapper(TgnTclWrapper):
         :param obj_ref: object reference of the object to delete.
         """
 
-        return self.stc_command('delete', obj_ref)
+        return self.avl_command('delete', obj_ref)
 
     def get(self, obj_ref, attribute=None):
         """ Returns the value(s) of one or more object attributes or a set of object handles.
@@ -75,7 +77,7 @@ class AvlTclWrapper(TgnTclWrapper):
             If single attribute was requested, the returned value is simple str.
         """
 
-        output = self.stc_command('get', obj_ref, '-' + attribute if attribute is not None else '')
+        output = self.avl_command('get', obj_ref, '-' + attribute if attribute is not None else '')
         if attribute:
             return output
         attributes_dict = dict(zip(*[iter(tcl_list_2_py_list(output))] * 2))
@@ -83,7 +85,7 @@ class AvlTclWrapper(TgnTclWrapper):
 
     def getList(self, obj_ref, attribute):
 
-        output = self.stc_command('get', obj_ref, '-' + attribute if attribute is not None else '')
+        output = self.avl_command('get', obj_ref, '-' + attribute if attribute is not None else '')
         return tcl_list_2_py_list(output)
 
     def perform(self, command, **arguments):
@@ -94,7 +96,7 @@ class AvlTclWrapper(TgnTclWrapper):
         :return: dictionary {attribute, value} as returned by 'perform command'.
         """
 
-        rc = self.stc_command('perform', command, get_args_pairs(arguments))
+        rc = self.avl_command('perform', command, get_args_pairs(arguments))
         self.command_rc = {k[1:]: v for k, v in dict(zip(*[iter(tcl_list_2_py_list(rc))] * 2)).items()}
         return self.command_rc
 
@@ -107,7 +109,7 @@ class AvlTclWrapper(TgnTclWrapper):
         :return: ResultDataSet handler
         """
 
-        return self.stc_command('subscribe', get_args_pairs(arguments))
+        return self.avl_command('subscribe', get_args_pairs(arguments))
 
     def unsubscribe(self, result_data_set):
         """ Unsubscribe from statistics view.
@@ -115,4 +117,4 @@ class AvlTclWrapper(TgnTclWrapper):
         :param result_data_set: ResultDataSet handler
         """
 
-        self.stc_command('unsubscribe', result_data_set)
+        self.avl_command('unsubscribe', result_data_set)

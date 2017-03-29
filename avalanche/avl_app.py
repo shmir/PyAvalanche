@@ -1,59 +1,23 @@
 """
-This module implements classes and utility functions to manage STC application.
+This module implements classes and utility functions to manage Avalanche application.
 
 :author: yoram@ignissoft.com
 """
 
 from os import path
 import time
-import avalancheapi.avalanche
+from random import randint
 
 
 from trafficgenerator.trafficgenerator import TrafficGenerator
 
-from avalanche.api.stc_rest import StcRestWrapper
-from avalanche.stc_object import StcObject
-from avalanche.stc_device import (StcDevice, StcServer, StcClient, StcBgpRouter, StcBgpRoute, StcPimRouter,
-                                   StcPimv4Group, StcOspfv2Router, StcRouterLsa, StcIgmpHost, StcIgmpQuerier,
-                                   StcIgmpGroup, StcOseSwitch, StcIsisRouter)
-from avalanche.stc_port import StcPort, StcGenerator, StcAnalyzer
-from avalanche.stc_project import StcProject, StcIpv4Group, StcIpv6Group
-from avalanche.stc_stream import StcStream, StcGroupCollection, StcTrafficGroup
-from avalanche.stc_hw import StcHw, StcPhyChassis, StcPhyModule, StcPhyPortGroup, StcPhyPort
+from avalanche.avl_object import AvlObject
+from avalanche.avl_hw import AvlPhyChassis
 
-TYPE_2_OBJECT = {'analyzer': StcAnalyzer,
-                 'bgprouterconfig': StcBgpRouter,
-                 'bgpipv4routeconfig': StcBgpRoute,
-                 'dhcpv4serverconfig': StcServer,
-                 'dhcpv4blockconfig': StcClient,
-                 'emulateddevice': StcDevice,
-                 'externallsablock': StcRouterLsa,
-                 'igmphostconfig': StcIgmpHost,
-                 'igmprouterconfig': StcIgmpQuerier,
-                 'igmpgroupmembership': StcIgmpGroup,
-                 'ipv4group': StcIpv4Group,
-                 'ipv6group': StcIpv6Group,
-                 'isisrouterconfig': StcIsisRouter,
-                 'generator': StcGenerator,
-                 'groupcollection': StcGroupCollection,
-                 'ospfv2routerconfig': StcOspfv2Router,
-                 'oseswitchconfig': StcOseSwitch,
-                 'pimrouterconfig': StcPimRouter,
-                 'pimv4groupblk': StcPimv4Group,
-                 'port': StcPort,
-                 'physicalchassis': StcPhyChassis,
-                 'physicalchassismanager': StcHw,
-                 'physicalport': StcPhyPort,
-                 'physicalportgroup': StcPhyPortGroup,
-                 'physicaltestmodule': StcPhyModule,
-                 'routerlsa': StcRouterLsa,
-                 'streamblock': StcStream,
-                 'summarylsablock': StcRouterLsa,
-                 'trafficgroup': StcTrafficGroup,
-                 }
+TYPE_2_OBJECT = {}
 
 
-class StcApp(TrafficGenerator):
+class AvlApp(TrafficGenerator):
     """ TestCenter driver. Equivalent to TestCenter Application. """
 
     lab_server = None
@@ -72,33 +36,30 @@ class StcApp(TrafficGenerator):
         self.logger = logger
         self.api = api_wrapper
 
-        StcObject.logger = self.logger
-        StcObject.api = self.api
-        StcObject.str_2_class = TYPE_2_OBJECT
+        AvlObject.logger = self.logger
+        AvlObject.api = self.api
+        AvlObject.str_2_class = TYPE_2_OBJECT
 
-        self.system = StcObject(objType='system', objRef='system1', parent=None)
+        self.system = AvlObject(objType='system', objRef='system1', parent=None)
+        self.api.avl_command('login {}'.format(randint(0, 999)))
 
-    def connect(self, lab_server=None):
+    def connect(self, chassis):
         """ Create object and (optionally) connect to lab server.
 
         :param lab_server: optional lab server address.
         """
 
-        self.lab_server = lab_server
-        if self.lab_server:
-            self.api.perform('CSTestSessionConnect', Host=self.lab_server, CreateNewTestSession=True)
-
-        # Every object creation/retrieval must come AFTER we connect to lab server (if needed).
         self.hw = self.system.get_child('PhysicalChassisManager')
-        self.project = StcProject(parent=self.system)
-        StcObject.project = self.project
+        chassis_ref = self.api.avl_command("connect {}".format(chassis))
+        chassis = AvlPhyChassis(objType='PhysicalChassis', parent=self.hw, objRef=chassis_ref)
+#         chassis.get_inventory()
 
     def disconnect(self):
-        """ Disconnect from lab server (if used) and reset configuration. """
+        """ Disconnect from chassis and shutdown. """
 
-        if self.lab_server:
-            self.api.perform('CSTestSessionDisconnect', Terminate=True)
-        self.reset_config()
+        for chassis in self.hw.get_objects_by_type('PhysicalChassis'):
+            self.api.avl_command("disconnect {}".format(chassis.get_attribute('IpAddress')))
+        self.api.avl_command("logout shutdown")
 
     def load_config(self, config_file_name):
         """ Load configuration file from tcc or xml.
@@ -108,9 +69,6 @@ class StcApp(TrafficGenerator):
         :param config_file_name: full path to the configuration file.
         """
 
-        if type(self.api) == StcRestWrapper:
-            self.api.ls.upload(config_file_name)
-            config_file_name = path.basename(config_file_name)
         ext = path.splitext(config_file_name)[-1].lower()
         if ext == '.tcc':
             self.api.perform('LoadFromDatabase', DatabaseConnectionString=path.normpath(config_file_name))
@@ -144,12 +102,6 @@ class StcApp(TrafficGenerator):
     # Online commands.
     # All commands assume that all ports are reserved and port objects exist under project.
     #
-
-    def send_arp_ns(self):
-        StcObject.send_arp_ns(*self.project.get_objects_or_children_by_type('port'))
-
-    def get_arp_cache(self):
-        return StcObject.get_arp_cache(*self.project.get_objects_or_children_by_type('port'))
 
     #
     # Devices commands.

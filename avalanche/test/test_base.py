@@ -7,10 +7,9 @@ Base class for all STC package tests.
 from os import path
 
 from trafficgenerator.test.test_tgn import TgnTest
-from trafficgenerator.tgn_tcl import TgnTkMultithread
 
 from avalanche.api.avl_tcl import AvlTclWrapper
-from avalanche.avl_app import StcApp
+from avalanche.avl_app import AvlApp
 
 
 class AvlTestBase(TgnTest):
@@ -22,15 +21,14 @@ class AvlTestBase(TgnTest):
 
     def setUp(self):
         super(AvlTestBase, self).setUp()
-        api_wrapper = AvlTclWrapper(self.logger, self.config.get('AVL', 'install_dir'))
-#         self.avl = StcApp(self.logger, api_wrapper=api_wrapper)
-#         log_level = self.config.get('AVL', 'log_level')
-#         self.stc.system.get_child('automationoptions').set_attributes(LogLevel=log_level)
-#         self.stc.connect()
+        api_wrapper = AvlTclWrapper(self.logger, self.config.get('Tcl', 'install_dir'),
+                                    self.config.get('AVL', 'install_dir'))
+        self.avl = AvlApp(self.logger, api_wrapper=api_wrapper)
+        self.avl.connect(self.config.get('AVL', 'chassis'))
 
     def tearDown(self):
         super(AvlTestBase, self).tearDown()
-        self.stc.disconnect()
+        self.avl.disconnect()
         if self.tcl_interp:
             self.tcl_interp.stop()
 

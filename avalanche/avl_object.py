@@ -20,7 +20,7 @@ def extract_stc_obj_type_from_obj_ref(obj_ref):
     return m.group(1) if m else obj_ref
 
 
-class StcObject(TgnObject):
+class AvlObject(TgnObject):
 
     # Class level variables
     logger = None
@@ -35,9 +35,9 @@ class StcObject(TgnObject):
             if 'parent' not in data:
                 self._data['objRef'] = data['objRef']
                 data['parent'] = self.get_object_from_attribute('parent')
-        if type(self) == StcObject:
+        if type(self) == AvlObject:
             self.__class__ = self.get_obj_class(data['objType'])
-        super(StcObject, self).__init__(**data)
+        super(AvlObject, self).__init__(**data)
 
     def get_obj_class(self, obj_type):
         """
@@ -45,7 +45,7 @@ class StcObject(TgnObject):
         :return: object class if specific class else StcObject.
         """
 
-        return StcObject.str_2_class.get(obj_type.lower(), StcObject)
+        return AvlObject.str_2_class.get(obj_type.lower(), AvlObject)
 
     def _create(self):
         """ Create new object on STC.
@@ -84,7 +84,7 @@ class StcObject(TgnObject):
         for handle in self.get_attribute(attribute).split():
             obj = self.project.get_object_by_ref(handle)
             if not obj:
-                obj = StcObject(objRef=handle)
+                obj = AvlObject(objRef=handle)
             objects.append(obj)
         return objects
 
@@ -118,16 +118,10 @@ class StcObject(TgnObject):
 
     def get_children(self, *types):
         children_objs = OrderedDict()
-        if not types:
-            types = self.get_all_child_types()
         for child_type in types:
-            output = self.get_attribute('children' + '-' + child_type)
+            output = self.get_attribute(child_type)
             children_objs.update(self._build_children_objs(child_type, output.split(' ')))
         return list(children_objs.values())
-
-    def get_all_child_types(self):
-        children = self.get_attribute('children').split()
-        return list(set([m.group(1) for c in children for m in [re.search('(.*\D+)\d+', c)]]))
 
     def set_attributes(self, apply_=False, **attributes):
         self.api.config(self.obj_ref(), **attributes)
@@ -137,20 +131,12 @@ class StcObject(TgnObject):
     def set_active(self, active):
         self.set_attributes(Active=active)
 
-    def set_targets(self, apply_=False, **attributes):
-        attributes_targets = {}
-        for attribute, value in attributes.items():
-            attributes_targets[attribute + '-targets'] = value
-        self.set_attributes(apply_, **attributes_targets)
-
-    def set_sources(self, apply_=False, **attributes):
-        attributes_targets = {}
-        for attribute, value in attributes.items():
-            attributes_targets[attribute + '-sources'] = value
-        self.set_attributes(apply_, **attributes_targets)
-
     def get_name(self):
-        return self.get_attribute('Name')
+        try:
+            name = self.get_attribute('Name')
+        except Exception as e:
+            name = self.obj_ref()
+        return name
 
     def get_active(self):
         return self.get_attribute('Active')
@@ -159,17 +145,3 @@ class StcObject(TgnObject):
         status = self.api.command_rc[attribute].lower()
         if status and 'passed' not in status and 'successful' not in status:
             raise TgnError('{} = {}'.format(attribute, status))
-
-    @classmethod
-    def send_arp_ns(cls, *objects):
-        """ Send ARP and NS for ports, devices or stream blocks. """
-        StcObject.api.perform('ArpNdStart', HandleList=build_obj_ref_list(objects))
-
-    @classmethod
-    def get_arp_cache(self, *objects):
-        arp_table = []
-        for obj in objects:
-            obj.command('ArpNdUpdateArpCache', HandleList=obj.obj_ref())
-            arp_cache = obj.get_child('ArpCache')
-            arp_table += arp_cache.get_list_attribute('ArpCacheData')
-        return arp_table
