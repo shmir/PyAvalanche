@@ -5,13 +5,13 @@ This module implements classes and utility functions to manage Avalanche applica
 """
 
 from os import path
-import time
 from random import randint
-
+import shutil
 
 from trafficgenerator.trafficgenerator import TrafficGenerator
 
 from avalanche.avl_object import AvlObject
+from avalanche.avl_project import AvlProject
 from avalanche.avl_hw import AvlPhyChassis
 
 TYPE_2_OBJECT = {}
@@ -24,6 +24,7 @@ class AvlApp(TrafficGenerator):
 
     system = None
     project = None
+    hw = None
 
     def __init__(self, logger, api_wrapper):
         """ Set all kinds of application level objects - logger, api, etc.
@@ -41,6 +42,7 @@ class AvlApp(TrafficGenerator):
         AvlObject.str_2_class = TYPE_2_OBJECT
 
         self.system = AvlObject(objType='system', objRef='system1', parent=None)
+        self.system.hw = None
         self.api.avl_command('login {}'.format(randint(0, 999)))
 
     def connect(self, chassis):
@@ -49,78 +51,42 @@ class AvlApp(TrafficGenerator):
         :param lab_server: optional lab server address.
         """
 
-        self.hw = self.system.get_child('PhysicalChassisManager')
+        self.system.hw = self.system.get_child('PhysicalChassisManager')
         chassis_ref = self.api.avl_command("connect {}".format(chassis))
-        chassis = AvlPhyChassis(objType='PhysicalChassis', parent=self.hw, objRef=chassis_ref)
-#         chassis.get_inventory()
+        chassis = AvlPhyChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
+        chassis.get_inventory()
 
     def disconnect(self):
         """ Disconnect from chassis and shutdown. """
 
-        for chassis in self.hw.get_objects_by_type('PhysicalChassis'):
-            self.api.avl_command("disconnect {}".format(chassis.get_attribute('IpAddress')))
+        if self.system.hw:
+            for chassis in self.hw.get_objects_by_type('PhysicalChassis'):
+                self.api.avl_command("disconnect {}".format(chassis.get_attribute('IpAddress')))
         self.api.avl_command("logout shutdown")
 
     def load_config(self, config_file_name):
         """ Load configuration file from tcc or xml.
 
-        Configuration file type is extracted from the file suffix - xml or tcc.
-
         :param config_file_name: full path to the configuration file.
         """
 
-        ext = path.splitext(config_file_name)[-1].lower()
-        if ext == '.tcc':
-            self.api.perform('LoadFromDatabase', DatabaseConnectionString=path.normpath(config_file_name))
-        elif ext == '.xml':
-            self.api.perform('LoadFromXml', FileName=path.normpath(config_file_name))
-        else:
-            raise ValueError('Configuration file type {} not supported.'.format(ext))
-
-    def reset_config(self):
-        self.api.perform('ResetConfig', config='system1')
+        project_ref = self.api.perform('import ' + self.system.obj_ref(), File=path.normpath(config_file_name))
+        self.project = AvlProject(parent=self.system, objRef=project_ref)
 
     def save_config(self, config_file_name):
         """ Save configuration file as tcc or xml.
 
-        Configuration file type is extracted from the file suffix - xml or tcc.
         :param config_file_name: full path to the configuration file.
         """
 
-        ext = path.splitext(config_file_name)[-1].lower()
-        if ext == '.tcc':
-            self.api.perform('SaveToTcc', FileName=path.normpath(config_file_name))
-        elif ext == '.xml':
-            self.api.perform('SaveAsXml', FileName=path.normpath(config_file_name))
-        else:
-            raise ValueError('Configuration file type {0} not supported.'.format(ext))
-
-    def clear_results(self):
-        self.project.clear_results()
+        self.api.perform('save ' + self.system.obj_ref())
+        self.api.perform('export ' + self.system.obj_ref(), projectsTestsHandles=self.project.obj_ref())
+        shutil.copy(self.system.get_attribute('latestExportedFile'), config_file_name)
 
     #
     # Online commands.
     # All commands assume that all ports are reserved and port objects exist under project.
     #
-
-    #
-    # Devices commands.
-    #
-
-    def start_devices(self):
-        """ Start all devices.
-
-        It is the test responsibility to wait for devices to reach required state.
-        """
-        self._command_devices('DeviceStart')
-
-    def stop_devices(self):
-        self._command_devices('DeviceStop')
-
-    def _command_devices(self, command):
-        self.project.command_devices(command, 4)
-        self.project.test_command_rc('Status')
-        time.sleep(4)
 
     #
     # Traffic commands.

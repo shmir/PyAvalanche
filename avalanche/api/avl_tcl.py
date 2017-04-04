@@ -93,12 +93,10 @@ class AvlTclWrapper(TgnTclWrapper):
 
         :param command: requested command.
         :param arguments: additional arguments.
-        :return: dictionary {attribute, value} as returned by 'perform command'.
+        :return: value returned by 'perform command'.
         """
 
-        rc = self.avl_command('perform', command, get_args_pairs(arguments))
-        self.command_rc = {k[1:]: v for k, v in dict(zip(*[iter(tcl_list_2_py_list(rc))] * 2)).items()}
-        return self.command_rc
+        return self.avl_command('perform', command, get_args_pairs(arguments))
 
     def subscribe(self, **arguments):
         """ Subscribe to statistics view.

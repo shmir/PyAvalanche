@@ -9,7 +9,6 @@ import re
 from collections import OrderedDict
 
 from trafficgenerator.tgn_utils import TgnError
-from trafficgenerator.tgn_tcl import build_obj_ref_list
 from trafficgenerator.tgn_object import TgnObject
 
 
@@ -134,7 +133,7 @@ class AvlObject(TgnObject):
     def get_name(self):
         try:
             name = self.get_attribute('Name')
-        except Exception as e:
+        except Exception as _:
             name = self.obj_ref()
         return name
 
