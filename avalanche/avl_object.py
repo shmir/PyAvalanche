@@ -119,7 +119,8 @@ class AvlObject(TgnObject):
         children_objs = OrderedDict()
         for child_type in types:
             output = self.get_attribute(child_type)
-            children_objs.update(self._build_children_objs(child_type, output.split(' ')))
+            clean_child_type = extract_stc_obj_type_from_obj_ref(output.split(' ')[0])
+            children_objs.update(self._build_children_objs(clean_child_type, output.split(' ')))
         return list(children_objs.values())
 
     def set_attributes(self, apply_=False, **attributes):

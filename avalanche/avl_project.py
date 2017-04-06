@@ -24,14 +24,31 @@ class AvlTest(AvlObject):
         self.client = self.get_child('configuration.test.client')
         self.server = self.get_child('configuration.test.server')
 
+
+class AvlCluster(AvlObject):
+    """ Represents Avalanche cluster. """
+
     pass
 
 
-class AvlServer(AvlObject):
-    """ Represents Avalanche test object. """
+class AvlClient(AvlCluster):
+    """ Represents Avalanche client side. """
 
     def __init__(self, **data):
         super(self.__class__, self).__init__(**data)
-        self.get_child('association')
+        self.associations = self.get_child('globalassociations.association', 'userbasedassociations.association')
 
-    pass
+
+class AvlServer(AvlCluster):
+    """ Represents Avalanche server side. """
+
+    def __init__(self, **data):
+        super(self.__class__, self).__init__(**data)
+        self.associations = self.get_child('association')
+
+
+class AvlAssociation(AvlObject):
+    """ Represents Avalanche association. """
+
+    def get_name(self):
+        return int(self.get_attribute('id')) + 1

@@ -1,5 +1,5 @@
 """
-This module implements classes and utility functions to manage Avalanche HW.
+Classes and utilities to manage Avalanche HW.
 
 :author: yoram@ignissoft.com
 """
@@ -9,49 +9,40 @@ from collections import OrderedDict
 from avalanche.avl_object import AvlObject
 
 
-class StcHw(AvlObject):
-    """ Represent STC physical chassis manager. """
-
-    pass
-
-
 class AvlPhyBase(AvlObject):
     """ Base class for all Avalanche Physical sub-tree objects. """
 
     def get_inventory(self):
         self.attributes = self.get_attributes(*self.attributes_names)
-        for child_var, child_type_name in self.children_types.items():
-            child_type, child_name = child_type_name
+        for child_var, child_type_index in self.children_types.items():
+            child_type, child_index = child_type_index
             children = OrderedDict()
-            for child in self.get_objects_or_children_by_type(child_type):
-                children[child_name + child.get_attribute('Index')] = child
+            for child in self.get_children(child_type):
+                children[child.get_attribute(child_index)] = child
             setattr(self, child_var, children)
             for child in getattr(self, child_var).values():
                 child.get_inventory()
 
 
-class AvlPhyChassis(AvlPhyBase):
-    """ Represent STC physical chassis. """
+class AvlChassis(AvlPhyBase):
+    """ Represent Avalanche physical chassis/appliance. """
 
-    attributes_names = ('Model', 'SerialNum')
-    children_types = {'modules': ('PhysicalTestModule', 'Slot ')}
+    attributes_names = ('ActiveSoftware', 'Model', 'SerialNumber')
+    children_types = {'modules': ('PhysicalTestModules', 'SlotNumber')}
 
     def get_module_by_index(self, index):
         for module in self.modules.values():
-            if module.attributes['Index'] == index:
+            if module.attributes['SlotNumber'] == index:
                 return module
 
 
-class AvlPhyModule(AvlPhyBase):
+class AvlModule(AvlPhyBase):
 
-    attributes_names = ('Index', 'Model', 'Description', 'SerialNum', 'FirmwareVersion')
-    children_types = {'ports': ('PhysicalPort', 'Port ')}
+    attributes_names = ()
+    children_types = {'ports': ('Ports', 'PortNumber')}
 
 
-class AvlPhyPort(AvlPhyBase):
+class AvlPort(AvlPhyBase):
 
-    attributes_names = ('Index',)
+    attributes_names = ()
     children_types = {}
-
-    def get_supported_speeds(self):
-        pass

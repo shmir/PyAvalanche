@@ -11,11 +11,8 @@ import shutil
 from trafficgenerator.trafficgenerator import TrafficGenerator
 
 from avalanche.avl_object import AvlObject
-from avalanche.avl_project import AvlProject, AvlTest, AvlServer
-from avalanche.avl_hw import AvlPhyChassis
-
-TYPE_2_OBJECT = {'tests': AvlTest,
-                 'server': AvlServer}
+from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation
+from avalanche.avl_hw import AvlChassis, AvlModule, AvlPort
 
 
 class AvlApp(TrafficGenerator):
@@ -54,14 +51,14 @@ class AvlApp(TrafficGenerator):
 
         self.system.hw = self.system.get_child('PhysicalChassisManager')
         chassis_ref = self.api.avl_command("connect {}".format(chassis))
-        chassis = AvlPhyChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
+        chassis = AvlChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
         chassis.get_inventory()
 
     def disconnect(self):
         """ Disconnect from chassis and shutdown. """
 
         if self.system.hw:
-            for chassis in self.hw.get_objects_by_type('PhysicalChassis'):
+            for chassis in self.system.hw.get_objects_by_type('PhysicalChassis'):
                 self.api.avl_command("disconnect {}".format(chassis.get_attribute('IpAddress')))
         self.api.avl_command("logout shutdown")
 
@@ -101,3 +98,10 @@ class AvlApp(TrafficGenerator):
 
     def wait_traffic(self):
         self.project.wait_traffic()
+
+TYPE_2_OBJECT = {'association': AvlAssociation,
+                 'client': AvlClient,
+                 'server': AvlServer,
+                 'physicalport': AvlPort,
+                 'physicaltestmodule': AvlModule,
+                 'test': AvlTest}

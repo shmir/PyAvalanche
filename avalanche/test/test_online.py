@@ -20,20 +20,18 @@ class AvlTestOnline(AvlTestBase):
         """ Load configuration on ports and verify that ports are online. """
         self.logger.info(AvlTestOnline.testOnline.__doc__.strip())
 
-        self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.tcc'))
-
         self.avl.connect(self.config.get('AVL', 'chassis'))
 
-        self._reserve_ports()
-
-        for port in self.ports:
-            assert(port.is_online())
-
-        for port in self.ports:
-            port.release()
-
-        self.stc.project.get_object_by_name('Port 1').reserve(wait_for_up=False)
-        self.stc.project.get_object_by_name('Port 2').reserve(wait_for_up=False)
+#         self._reserve_ports()
+#
+#         for port in self.ports:
+#             assert(port.is_online())
+#
+#         for port in self.ports:
+#             port.release()
+#
+#         self.stc.project.get_object_by_name('Port 1').reserve(wait_for_up=False)
+#         self.stc.project.get_object_by_name('Port 2').reserve(wait_for_up=False)
 
         pass
 
