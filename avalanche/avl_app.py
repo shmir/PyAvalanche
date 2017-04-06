@@ -11,10 +11,11 @@ import shutil
 from trafficgenerator.trafficgenerator import TrafficGenerator
 
 from avalanche.avl_object import AvlObject
-from avalanche.avl_project import AvlProject
+from avalanche.avl_project import AvlProject, AvlTest, AvlServer
 from avalanche.avl_hw import AvlPhyChassis
 
-TYPE_2_OBJECT = {}
+TYPE_2_OBJECT = {'tests': AvlTest,
+                 'server': AvlServer}
 
 
 class AvlApp(TrafficGenerator):
