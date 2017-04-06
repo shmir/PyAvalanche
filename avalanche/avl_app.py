@@ -12,7 +12,7 @@ from trafficgenerator.trafficgenerator import TrafficGenerator
 
 from avalanche.avl_object import AvlObject
 from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation
-from avalanche.avl_hw import AvlChassis, AvlModule, AvlPort
+from avalanche.avl_hw import AvlHw, AvlChassis, AvlModule, AvlPort
 
 
 class AvlApp(TrafficGenerator):
@@ -43,24 +43,26 @@ class AvlApp(TrafficGenerator):
         self.system.hw = None
         self.api.avl_command('login {}'.format(randint(0, 999)))
 
+        self.system.hw = self.system.get_child('PhysicalChassisManager')
+
     def connect(self, chassis):
         """ Create object and (optionally) connect to lab server.
 
-        :param lab_server: optional lab server address.
+        :param chassis: avalanche chassis/appliance address.
         """
 
-        self.system.hw = self.system.get_child('PhysicalChassisManager')
-        chassis_ref = self.api.avl_command("connect {}".format(chassis))
-        chassis = AvlChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
-        chassis.get_inventory()
+        chassis_ref = self.api.avl_command("connect", chassis)
+        chassis_obj = AvlChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
+        self.system.hw.chassis[chassis] = chassis_obj
+        chassis_obj.get_inventory()
 
     def disconnect(self):
         """ Disconnect from chassis and shutdown. """
 
         if self.system.hw:
             for chassis in self.system.hw.get_objects_by_type('PhysicalChassis'):
-                self.api.avl_command("disconnect {}".format(chassis.get_attribute('IpAddress')))
-        self.api.avl_command("logout shutdown")
+                self.api.avl_command("disconnect", chassis.get_attribute('IpAddress'))
+        self.api.avl_command('logout', 'shutdown')
 
     def load_config(self, config_file_name):
         """ Load configuration file from tcc or xml.
@@ -102,6 +104,7 @@ class AvlApp(TrafficGenerator):
 TYPE_2_OBJECT = {'association': AvlAssociation,
                  'client': AvlClient,
                  'server': AvlServer,
+                 'physicalchassismanager': AvlHw,
                  'physicalport': AvlPort,
                  'physicaltestmodule': AvlModule,
                  'test': AvlTest}

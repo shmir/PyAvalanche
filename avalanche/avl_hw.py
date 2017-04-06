@@ -24,16 +24,20 @@ class AvlPhyBase(AvlObject):
                 child.get_inventory()
 
 
+class AvlHw(AvlPhyBase):
+
+    chassis = OrderedDict()
+
+    def get_port(self, location):
+        chassis, module, port = location.split('/')
+        return self.chassis[chassis].modules[module].ports[port]
+
+
 class AvlChassis(AvlPhyBase):
     """ Represent Avalanche physical chassis/appliance. """
 
     attributes_names = ('ActiveSoftware', 'Model', 'SerialNumber')
     children_types = {'modules': ('PhysicalTestModules', 'SlotNumber')}
-
-    def get_module_by_index(self, index):
-        for module in self.modules.values():
-            if module.attributes['SlotNumber'] == index:
-                return module
 
 
 class AvlModule(AvlPhyBase):
@@ -44,5 +48,11 @@ class AvlModule(AvlPhyBase):
 
 class AvlPort(AvlPhyBase):
 
-    attributes_names = ()
+    attributes_names = ('Location',)
     children_types = {}
+
+    def reserve(self):
+        self.api.avl_command('reserve', self.attributes['Location'])
+
+    def release(self):
+        self.api.avl_command('release', self.attributes['Location'])

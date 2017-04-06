@@ -22,6 +22,10 @@ class AvlTestOnline(AvlTestBase):
 
         self.avl.connect(self.config.get('AVL', 'chassis'))
 
+        self.avl.system.hw.get_port(self.config.get('AVL', 'port1')).reserve()
+
+        self.avl.system.hw.get_port(self.config.get('AVL', 'port1')).release()
+
 #         self._reserve_ports()
 #
 #         for port in self.ports:
