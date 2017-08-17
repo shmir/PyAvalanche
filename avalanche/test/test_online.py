@@ -7,8 +7,6 @@ Two Avalanche ports connected back to back.
 @author yoram@ignissoft.com
 """
 
-from os import path
-
 from avalanche.test.test_base import AvlTestBase
 
 
@@ -20,24 +18,9 @@ class AvlTestOnline(AvlTestBase):
         """ Load configuration on ports and verify that ports are online. """
         self.logger.info(AvlTestOnline.testOnline.__doc__.strip())
 
-        self.avl.connect(self.config.get('AVL', 'chassis'))
-
-        self.avl.system.hw.get_port(self.config.get('AVL', 'port1')).reserve()
-
-        self.avl.system.hw.get_port(self.config.get('AVL', 'port1')).release()
-
-#         self._reserve_ports()
-#
-#         for port in self.ports:
-#             assert(port.is_online())
-#
-#         for port in self.ports:
-#             port.release()
-#
-#         self.stc.project.get_object_by_name('Port 1').reserve(wait_for_up=False)
-#         self.stc.project.get_object_by_name('Port 2').reserve(wait_for_up=False)
-
         pass
 
     def _reserve_ports(self):
+        self.avl.system.hw.get_port(self.config.get('AVL', 'client/1')).reserve()
+        self.avl.system.hw.get_port(self.config.get('AVL', 'client/1')).release()
         pass
