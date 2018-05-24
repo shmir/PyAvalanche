@@ -19,13 +19,9 @@ class AvlTestOffline(AvlTestBase):
         file_name, file_ext = path.splitext(path.join(path.dirname(__file__), 'configs/test_config.spf'))
         self.avl.save_config(file_name + '-save' + file_ext)
 
-        pass
-
     def testAnalyzeConfig(self):
         """ Analyze existing configuration. """
         self.logger.info(AvlTestOffline.testAnalyzeConfig.__doc__.strip())
 
         self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
         assert(len(self.avl.project.get_tests()) == 3)
-
-        pass

@@ -9,6 +9,17 @@ from collections import OrderedDict
 from avalanche.avl_object import AvlObject
 
 
+class AvlHw(AvlObject):
+    """ Represent STC port. """
+
+    def get_chassis(self, hostname):
+        for chassis in self.get_children('PhysicalChassis'):
+            if chassis.get_attribute('Hostname') == hostname:
+                return chassis
+        connect_rc = self.api.avl_command('connect', hostname)
+        return AvlPhyChassis(parent=self, objRef=connect_rc)
+
+
 class AvlPhyBase(AvlObject):
     """ Base class for all Avalanche Physical sub-tree objects. """
 
@@ -18,35 +29,26 @@ class AvlPhyBase(AvlObject):
             child_type, child_index = child_type_index
             children = OrderedDict()
             for child in self.get_children(child_type):
-                children[child.get_attribute(child_index)] = child
+                children[int(child.get_attribute(child_index))] = child
             setattr(self, child_var, children)
             for child in getattr(self, child_var).values():
                 child.get_inventory()
 
 
-class AvlHw(AvlPhyBase):
-
-    chassis = OrderedDict()
-
-    def get_port(self, location):
-        chassis, module, port = location.split('/')
-        return self.chassis[chassis].modules[module].ports[port]
-
-
-class AvlChassis(AvlPhyBase):
+class AvlPhyChassis(AvlPhyBase):
     """ Represent Avalanche physical chassis/appliance. """
 
     attributes_names = ('ActiveSoftware', 'Model', 'SerialNumber')
     children_types = {'modules': ('PhysicalTestModules', 'SlotNumber')}
 
 
-class AvlModule(AvlPhyBase):
+class AvlPhyModule(AvlPhyBase):
 
     attributes_names = ()
     children_types = {'ports': ('Ports', 'PortNumber')}
 
 
-class AvlPort(AvlPhyBase):
+class AvlPhyPort(AvlPhyBase):
 
     attributes_names = ('Location',)
     children_types = {}

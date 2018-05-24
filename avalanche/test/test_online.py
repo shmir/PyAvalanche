@@ -14,13 +14,23 @@ class AvlTestOnline(AvlTestBase):
 
     ports = []
 
-    def testOnline(self):
+    def test_inventory(self):
         """ Load configuration on ports and verify that ports are online. """
-        self.logger.info(AvlTestOnline.testOnline.__doc__.strip())
+        self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
+        ip, module, port = self.config.get('AVL', 'port1').split('/')
+        chassis = self.avl.hw.get_chassis(ip)
+        chassis.get_inventory()
+        print chassis.modules
+        print chassis.modules[int(module)].ports
 
-        pass
+    def test_reserve_ports(self):
+        """ Load configuration on ports and verify that ports are online. """
+        self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
+        ip, module, port = self.config.get('AVL', 'port1').split('/')
+        chassis = self.avl.hw.get_chassis(ip)
+        chassis.get_inventory()
+        chassis.modules[int(module)].ports[int(port)].reserve()
 
     def _reserve_ports(self):
-        self.avl.system.hw.get_port(self.config.get('AVL', 'client/1')).reserve()
-        self.avl.system.hw.get_port(self.config.get('AVL', 'client/1')).release()
-        pass
+        self.avl.hw.get_port(self.config.get('AVL', 'port1')).reserve()
+        self.avl.hw.get_port(self.config.get('AVL', 'port2')).reserve()

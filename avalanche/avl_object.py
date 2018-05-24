@@ -21,11 +21,6 @@ def extract_stc_obj_type_from_obj_ref(obj_ref):
 
 class AvlObject(TgnObject):
 
-    # Class level variables
-    logger = None
-    api = None
-    project = None
-
     str_2_class = {}
 
     def __init__(self, **data):

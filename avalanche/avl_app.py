@@ -8,21 +8,15 @@ from os import path
 from random import randint
 import shutil
 
-from trafficgenerator.trafficgenerator import TrafficGenerator
+from trafficgenerator.tgn_app import TgnApp
 
 from avalanche.avl_object import AvlObject
 from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation
-from avalanche.avl_hw import AvlHw, AvlChassis, AvlModule, AvlPort
+from avalanche.avl_hw import AvlHw, AvlPhyChassis, AvlPhyModule, AvlPhyPort
 
 
-class AvlApp(TrafficGenerator):
+class AvlApp(TgnApp):
     """ TestCenter driver. Equivalent to TestCenter Application. """
-
-    lab_server = None
-
-    system = None
-    project = None
-    hw = None
 
     def __init__(self, logger, api_wrapper):
         """ Set all kinds of application level objects - logger, api, etc.
@@ -31,38 +25,35 @@ class AvlApp(TrafficGenerator):
         :param api_wrapper: api wrapper object inheriting and implementing StcApi base class.
         """
 
-        super(self.__class__, self).__init__()
-        self.logger = logger
-        self.api = api_wrapper
-
-        AvlObject.logger = self.logger
-        AvlObject.api = self.api
+        super(self.__class__, self).__init__(logger, api_wrapper)
         AvlObject.str_2_class = TYPE_2_OBJECT
 
         self.system = AvlObject(objType='system', objRef='system1', parent=None)
-        self.system.hw = None
-        self.api.avl_command('login {}'.format(randint(0, 999)))
+        self.system.api = self.api
+        self.system.logger = self.logger
 
-        self.system.hw = self.system.get_child('PhysicalChassisManager')
+        self.hw = None
+        self.project = None
+        self.connected = False
 
-    def connect(self, chassis):
-        """ Create object and (optionally) connect to lab server.
-
-        :param chassis: avalanche chassis/appliance address.
+    def connect(self):
+        """ Login to Avalanche server.
+        Login must be the first command.
         """
 
-        chassis_ref = self.api.avl_command("connect", chassis)
-        chassis_obj = AvlChassis(objType='PhysicalChassis', parent=self.system.hw, objRef=chassis_ref)
-        self.system.hw.chassis[chassis] = chassis_obj
-        chassis_obj.get_inventory()
+        self.api.avl_command('login {}'.format(randint(0, 999)))
+        self.hw = self.system.get_child('PhysicalChassisManager')
+        self.connected = True
 
     def disconnect(self):
         """ Disconnect from chassis and shutdown. """
 
-        if self.system.hw:
-            for chassis in self.system.hw.get_objects_by_type('PhysicalChassis'):
+        if self.hw:
+            for chassis in self.hw.get_objects_by_type('PhysicalChassis'):
                 self.api.avl_command("disconnect", chassis.get_attribute('IpAddress'))
-        self.api.avl_command('logout', 'shutdown')
+        if self.connected:
+            self.api.avl_command('logout', 'shutdown')
+        self.connected = False
 
     def load_config(self, config_file_name):
         """ Load configuration file from tcc or xml.
@@ -72,6 +63,7 @@ class AvlApp(TrafficGenerator):
 
         project_ref = self.api.perform('import ' + self.system.obj_ref(), File=path.normpath(config_file_name))
         self.project = AvlProject(parent=self.system, objRef=project_ref)
+        self.project.project = self.project
 
     def save_config(self, config_file_name):
         """ Save configuration file as tcc or xml.
@@ -105,6 +97,6 @@ TYPE_2_OBJECT = {'association': AvlAssociation,
                  'client': AvlClient,
                  'server': AvlServer,
                  'physicalchassismanager': AvlHw,
-                 'physicalport': AvlPort,
-                 'physicaltestmodule': AvlModule,
+                 'physicalport': AvlPhyPort,
+                 'physicaltestmodule': AvlPhyModule,
                  'test': AvlTest}

@@ -24,6 +24,7 @@ class AvlTestBase(TgnTest):
         api_wrapper = AvlTclWrapper(self.logger, self.config.get('Tcl', 'install_dir'),
                                     self.config.get('AVL', 'install_dir'))
         self.avl = AvlApp(self.logger, api_wrapper=api_wrapper)
+        self.avl.connect()
 
     def tearDown(self):
         super(AvlTestBase, self).tearDown()
