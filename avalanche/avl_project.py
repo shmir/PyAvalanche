@@ -12,7 +12,8 @@ class AvlProject(AvlObject):
         super(self.__class__, self).__init__(objType='project', **data)
         self.get_children('tests')
 
-    def get_tests(self):
+    @property
+    def tests(self):
         return self.get_objects_by_type('test')
 
 

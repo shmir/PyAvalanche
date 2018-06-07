@@ -10,9 +10,21 @@ import shutil
 
 from trafficgenerator.tgn_app import TgnApp
 
+from avalanche.api.avl_tcl import AvlTclWrapper
 from avalanche.avl_object import AvlObject
 from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation
 from avalanche.avl_hw import AvlHw, AvlPhyChassis, AvlPhyModule, AvlPhyPort
+
+
+def init_avl(logger, tcl_lib_install_dir, avl_install_dir):
+    """ Create Avalanche application object.
+
+    :param logger: python logger object
+    :param tcl_lib_install_dir: Tcllib directory
+    :param avl_install_dir: Avalanche installation directory
+    :return: Avalanche object
+    """
+    return AvlApp(logger, AvlTclWrapper(logger, tcl_lib_install_dir, avl_install_dir))
 
 
 class AvlApp(TgnApp):

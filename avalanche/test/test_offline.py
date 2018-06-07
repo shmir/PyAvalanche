@@ -24,4 +24,4 @@ class AvlTestOffline(AvlTestBase):
         self.logger.info(AvlTestOffline.testAnalyzeConfig.__doc__.strip())
 
         self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
-        assert(len(self.avl.project.get_tests()) == 3)
+        assert(len(self.avl.project.tests) == 3)

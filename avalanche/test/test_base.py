@@ -8,8 +8,7 @@ from os import path
 
 from trafficgenerator.test.test_tgn import TgnTest
 
-from avalanche.api.avl_tcl import AvlTclWrapper
-from avalanche.avl_app import AvlApp
+from avalanche.avl_app import init_avl
 
 
 class AvlTestBase(TgnTest):
@@ -21,9 +20,7 @@ class AvlTestBase(TgnTest):
 
     def setUp(self):
         super(AvlTestBase, self).setUp()
-        api_wrapper = AvlTclWrapper(self.logger, self.config.get('Tcl', 'install_dir'),
-                                    self.config.get('AVL', 'install_dir'))
-        self.avl = AvlApp(self.logger, api_wrapper=api_wrapper)
+        self.avl = init_avl(self.logger, self.config.get('Tcl', 'install_dir'), self.config.get('AVL', 'install_dir'))
         self.avl.connect()
 
     def tearDown(self):
