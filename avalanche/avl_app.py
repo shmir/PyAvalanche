@@ -12,7 +12,7 @@ from trafficgenerator.tgn_app import TgnApp
 
 from avalanche.api.avl_tcl import AvlTclWrapper
 from avalanche.avl_object import AvlObject
-from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation
+from avalanche.avl_project import AvlProject, AvlTest, AvlClient, AvlServer, AvlAssociation, AvlInterface
 from avalanche.avl_hw import AvlHw, AvlPhyChassis, AvlPhyModule, AvlPhyPort
 
 
@@ -105,7 +105,9 @@ class AvlApp(TgnApp):
     def wait_traffic(self):
         self.project.wait_traffic()
 
-TYPE_2_OBJECT = {'association': AvlAssociation,
+
+TYPE_2_OBJECT = {'interface': AvlInterface,
+                 'association': AvlAssociation,
                  'client': AvlClient,
                  'server': AvlServer,
                  'physicalchassismanager': AvlHw,

@@ -7,6 +7,8 @@ Two Avalanche ports connected back to back.
 @author yoram@ignissoft.com
 """
 
+from os import path
+
 from avalanche.test.test_base import AvlTestBase
 
 
@@ -15,9 +17,10 @@ class AvlTestOnline(AvlTestBase):
     ports = []
 
     def test_inventory(self):
-        """ Load configuration on ports and verify that ports are online. """
+        """ Get chassis inventory. """
         self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
-        ip, module, port = self.config.get('AVL', 'port1').split('/')
+
+        ip, module, port = self.config.get('Client', 'association_1').split('/')
         chassis = self.avl.hw.get_chassis(ip)
         chassis.get_inventory()
         print chassis.modules
@@ -26,11 +29,20 @@ class AvlTestOnline(AvlTestBase):
     def test_reserve_ports(self):
         """ Load configuration on ports and verify that ports are online. """
         self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
-        ip, module, port = self.config.get('AVL', 'port1').split('/')
-        chassis = self.avl.hw.get_chassis(ip)
-        chassis.get_inventory()
-        chassis.modules[int(module)].ports[int(port)].reserve()
 
-    def _reserve_ports(self):
-        self.avl.hw.get_port(self.config.get('AVL', 'port1')).reserve()
-        self.avl.hw.get_port(self.config.get('AVL', 'port2')).reserve()
+        self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
+        self._reserve_ports(self.config.get('Client', 'association_1'),
+                            self.config.get('Server', 'association_1'))
+        self.avl.project.tests['Test'].client.associations[0].interface.set_port(self.config.get('Client', 'association_1'))
+        self.avl.project.tests['Test'].server.associations[0].interface.set_port(self.config.get('Server', 'association_1'))
+
+
+    def _reserve_ports(self, *locations):
+        chassis_list = []
+        for location in locations:
+            ip, module, port = location.split('/')
+            chassis = self.avl.hw.get_chassis(ip)
+            if chassis not in chassis_list:
+                chassis.get_inventory()
+                chassis_list.append(chassis)
+            chassis.modules[int(module)].ports[int(port)].reserve()

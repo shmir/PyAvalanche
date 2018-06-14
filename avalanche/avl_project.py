@@ -14,7 +14,7 @@ class AvlProject(AvlObject):
 
     @property
     def tests(self):
-        return self.get_objects_by_type('test')
+        return {test.name: test for test in self.get_objects_by_type('test')}
 
 
 class AvlTest(AvlObject):
@@ -37,7 +37,7 @@ class AvlClient(AvlCluster):
 
     def __init__(self, **data):
         super(self.__class__, self).__init__(**data)
-        self.associations = self.get_child('globalassociations.association', 'userbasedassociations.association')
+        self.associations = self.get_children('globalassociations.association', 'userbasedassociations.association')
 
 
 class AvlServer(AvlCluster):
@@ -45,11 +45,22 @@ class AvlServer(AvlCluster):
 
     def __init__(self, **data):
         super(self.__class__, self).__init__(**data)
-        self.associations = self.get_child('association')
+        self.associations = self.get_children('association')
 
 
 class AvlAssociation(AvlObject):
     """ Represents Avalanche association. """
 
+    def __init__(self, **data):
+        super(self.__class__, self).__init__(**data)
+        self.interface = self.get_child('associated_interface')
+
     def get_name(self):
         return int(self.get_attribute('id')) + 1
+
+
+class AvlInterface(AvlObject):
+    """ Represents Avalanche interface. """
+
+    def set_port(self, location):
+        self.set_attributes(port=location)

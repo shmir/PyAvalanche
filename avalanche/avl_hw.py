@@ -13,8 +13,8 @@ class AvlHw(AvlObject):
     """ Represent STC port. """
 
     def get_chassis(self, hostname):
-        for chassis in self.get_children('PhysicalChassis'):
-            if chassis.get_attribute('Hostname') == hostname:
+        for chassis in self.get_objects_or_children_by_type('PhysicalChassis'):
+            if chassis.get_attribute('ipAddress') == hostname:
                 return chassis
         connect_rc = self.api.avl_command('connect', hostname)
         return AvlPhyChassis(parent=self, objRef=connect_rc)
