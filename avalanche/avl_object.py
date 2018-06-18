@@ -24,6 +24,9 @@ class AvlObject(TgnObject):
     str_2_class = {}
 
     def __init__(self, **data):
+        if data['parent']:
+            self.system = data['parent'].system
+            self.project = data['parent'].project
         if 'objRef' in data:
             data['objType'] = extract_stc_obj_type_from_obj_ref(data['objRef'])
             if 'parent' not in data:
@@ -56,8 +59,9 @@ class AvlObject(TgnObject):
             return stc_obj
 
     def command(self, command, wait_after=0, **arguments):
-        self.api.perform(command, **arguments)
+        rc = self.api.perform(command, **arguments)
         time.sleep(wait_after)
+        return rc
 
     def get_attribute(self, attribute):
         """ Get single attribute value.

@@ -33,10 +33,6 @@ class AvlTclWrapper(TgnTclWrapper):
     # SpirentTestCenter Tcl package commands.
     #
 
-    def apply(self):
-        """ Sends a test configuration to the Spirent TestCenter chassis. """
-        self.avl_command('apply')
-
     def config(self, obj_ref, **attributes):
         """ Set or modifies one or more object attributes, or a relation.
 

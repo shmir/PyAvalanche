@@ -41,6 +41,8 @@ class AvlApp(TgnApp):
         AvlObject.str_2_class = TYPE_2_OBJECT
 
         self.system = AvlObject(objType='system', objRef='system1', parent=None)
+        self.system.system = self.system
+        self.system.project = None
         self.system.api = self.api
         self.system.logger = self.logger
 
@@ -86,24 +88,6 @@ class AvlApp(TgnApp):
         self.api.perform('save ' + self.system.obj_ref())
         self.api.perform('export ' + self.system.obj_ref(), projectsTestsHandles=self.project.obj_ref())
         shutil.copy(self.system.get_attribute('latestExportedFile'), config_file_name)
-
-    #
-    # Online commands.
-    # All commands assume that all ports are reserved and port objects exist under project.
-    #
-
-    #
-    # Traffic commands.
-    #
-
-    def start_traffic(self, blocking=False):
-        self.project.start_ports(blocking)
-
-    def stop_traffic(self):
-        self.project.stop_ports()
-
-    def wait_traffic(self):
-        self.project.wait_traffic()
 
 
 TYPE_2_OBJECT = {'interface': AvlInterface,

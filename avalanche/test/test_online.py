@@ -36,6 +36,20 @@ class AvlTestOnline(AvlTestBase):
         self.avl.project.tests['Test'].client.associations[0].interface.set_port(self.config.get('Client', 'association_1'))
         self.avl.project.tests['Test'].server.associations[0].interface.set_port(self.config.get('Server', 'association_1'))
 
+    def test_run_wait(self):
+        """ Load configuration on ports, run test and wait for test to complete. """
+        self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
+
+        self.test_reserve_ports()
+        self.avl.project.tests['Test'].start(trial=True, blocking=True)
+
+    def test_run_stop(self):
+        """ Load configuration on ports, run test and wait for test to complete. """
+        self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
+
+        self.test_reserve_ports()
+        self.avl.project.tests['Test'].start(trial=True)
+        self.avl.project.tests['Test'].stop()
 
     def _reserve_ports(self, *locations):
         chassis_list = []
