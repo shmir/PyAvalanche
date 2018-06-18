@@ -20,7 +20,7 @@ testcenter.api.stc_rest module
     :undoc-members:
     :show-inheritance:
 
-testcenter.api.stc_tcl module
+testcenter.api. module
 -----------------------------
 
 .. automodule:: testcenter.api.stc_tcl

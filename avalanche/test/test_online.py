@@ -8,7 +8,9 @@ Two Avalanche ports connected back to back.
 """
 
 from os import path
+import json
 
+from avalanche.avl_statistics_view import AvlClientStats
 from avalanche.test.test_base import AvlTestBase
 
 
@@ -41,7 +43,13 @@ class AvlTestOnline(AvlTestBase):
         self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
 
         self.test_reserve_ports()
+
+        client_stats = AvlClientStats(self.avl.project, 'http')
+        client_stats.read_stats()
+        print(json.dumps(client_stats.statistics, indent=2))
         self.avl.project.tests['Test'].start(trial=True, blocking=True)
+        client_stats.read_stats()
+        print(json.dumps(client_stats.statistics, indent=2))
 
     def test_run_stop(self):
         """ Load configuration on ports, run test and wait for test to complete. """

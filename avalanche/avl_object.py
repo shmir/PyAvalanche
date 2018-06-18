@@ -108,7 +108,7 @@ class AvlObject(TgnObject):
         """
 
         if not attributes:
-            return self.api.get(self.obj_ref())
+            return self.api.get(self.ref)
         values = {}
         for attribute in attributes:
             values[attribute] = self.get_attribute(attribute)

@@ -93,22 +93,3 @@ class AvlTclWrapper(TgnTclWrapper):
         """
 
         return self.avl_command('perform', command, get_args_pairs(arguments))
-
-    def subscribe(self, **arguments):
-        """ Subscribe to statistics view.
-
-        :param arguments: subscribe command arguments.
-            must arguments: parent, resultParent, configType, resultType
-            + additional arguments.
-        :return: ResultDataSet handler
-        """
-
-        return self.avl_command('subscribe', get_args_pairs(arguments))
-
-    def unsubscribe(self, result_data_set):
-        """ Unsubscribe from statistics view.
-
-        :param result_data_set: ResultDataSet handler
-        """
-
-        self.avl_command('unsubscribe', result_data_set)
