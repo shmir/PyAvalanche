@@ -1,5 +1,4 @@
 future
 configparser
 
-avalancheapi
 pytrafficgen>=1.2.0

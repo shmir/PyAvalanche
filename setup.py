@@ -1,13 +1,11 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
 from __future__ import print_function
 from setuptools import setup
-from setuptools.command.test import test as TestCommand
 import io
-import os
-import sys
 
 import avalanche
-
-here = os.path.abspath(os.path.dirname(__file__))
 
 
 def read(*filenames, **kwargs):
@@ -19,36 +17,27 @@ def read(*filenames, **kwargs):
             buf.append(f.read())
     return sep.join(buf)
 
-long_description = read('README.txt')
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+install_requires = [r for r in required if r and r[0] != '#' and not r.startswith('git')]
 
-class PyTest(TestCommand):
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_args = []
-        self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errcode = pytest.main(self.test_args)
-        sys.exit(errcode)
+long_description = read('README.rst')
 
 setup(
-    name='avlooapi',
+    name='pyavalanche',
     version=avalanche.__version__,
     url='https://github.com/shmir/PyAvalanche/',
     license='Apache Software License',
     author='Yoram Shamir',
-    tests_require=['pytest'],
-    install_requires=['tgnooapi', 'avalancheapi'],
-    cmdclass={'test': PyTest},
+    install_requires=install_requires,
     author_email='yoram@ignissoft.com',
     description='Python OO API package to automate Spirent Avalanche traffic generator',
     long_description=long_description,
-    packages=['avalanche', 'avalanche.test'],
+    packages=['avalanche', 'avalanche.test', 'avalanche.api'],
     include_package_data=True,
     platforms='any',
-    test_suite='avalanche.test',
+    tests_require=['pytest'],
     classifiers=[
         'Programming Language :: Python',
         'Development Status :: 4 - Beta',
@@ -57,7 +46,4 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Topic :: Software Development :: Testing :: Traffic Generation'],
-    extras_require={
-        'testing': ['pytest'],
-    }
 )
