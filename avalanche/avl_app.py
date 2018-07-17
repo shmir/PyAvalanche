@@ -70,12 +70,19 @@ class AvlApp(TgnApp):
         self.connected = False
 
     def load_config(self, config_file_name):
-        """ Load configuration file from tcc or xml.
+        """ Import configuration file from spf file.
 
         :param config_file_name: full path to the configuration file.
         """
 
         project_ref = self.api.perform('import ' + self.system.obj_ref(), File=path.normpath(config_file_name))
+        self.project = AvlProject(parent=self.system, objRef=project_ref)
+        self.project.project = self.project
+
+    def new_config(self):
+        """ Create new, empty,  configuration. """
+
+        project_ref = self.api.avl_command('createProject', project='project1')
         self.project = AvlProject(parent=self.system, objRef=project_ref)
         self.project.project = self.project
 

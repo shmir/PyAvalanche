@@ -45,18 +45,16 @@ class AvlObject(TgnObject):
         return AvlObject.str_2_class.get(obj_type.lower(), AvlObject)
 
     def _create(self):
-        """ Create new object on STC.
+        """ Create new object on Avalanche.
 
-        @return: STC object reference.
+        @return: Avalanche object reference.
         """
 
         # At this time objRef is not set yet so we must use direct calls to api.
         if 'name' in self._data:
-            return self.api.create(self.obj_type(), self.obj_parent(), name=self.obj_name())
+            return self.api.create(self.type, self.parent, name=self.name)
         else:
-            stc_obj = self.api.create(self.obj_type(), self.obj_parent())
-            self._data['name'] = self.api.get(stc_obj, 'name')
-            return stc_obj
+            return self.api.create(self.type, self.parent)
 
     def command(self, command, wait_after=0, **arguments):
         rc = self.api.perform(command, **arguments)
@@ -69,7 +67,7 @@ class AvlObject(TgnObject):
         :param attribute: attribute name.
         :return: attribute value.
         """
-        return self.api.get(self.obj_ref(), attribute)
+        return self.api.get(self.ref, attribute)
 
     def get_list_attribute(self, attribute):
         """

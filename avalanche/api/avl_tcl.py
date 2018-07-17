@@ -26,8 +26,8 @@ class AvlTclWrapper(TgnTclWrapper):
         self.eval('package forget av')
         self.ver = self.eval('package require av')
 
-    def avl_command(self, command, *attributes):
-        return self.eval('av::' + command + ' ' + ' '.join(attributes))
+    def avl_command(self, command, *attributes, **key_attributes):
+        return self.eval('av::' + command + ' ' + ' '.join(attributes) + ' ' + get_args_pairs(key_attributes))
 
     #
     # SpirentTestCenter Tcl package commands.
@@ -43,16 +43,15 @@ class AvlTclWrapper(TgnTclWrapper):
         self.avl_command('config', obj_ref, get_args_pairs(attributes))
 
     def create(self, obj_type, parent, **attributes):
-        """ Creates one or more Spirent TestCenter Automation objects.
+        """ Creates Avalanche objects.
 
         :param obj_type: object type.
         :param parent: object parent - object will be created under this parent.
         :param attributes: additional attributes.
-        :return: STC object reference.
+        :return: Avalanche object reference.
         """
 
-        return self.avl_command('create ' + obj_type + ' -under ' + parent.obj_ref(),
-                                get_args_pairs(attributes))
+        return self.avl_command('create ' + obj_type, under=parent.ref, **attributes)
 
     def delete(self, obj_ref):
         """ Delete the specified object.
