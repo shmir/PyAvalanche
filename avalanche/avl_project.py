@@ -54,31 +54,34 @@ class AvlTest(AvlObject):
         while status != 'TEST_COMPLETED':
             time.sleep(1)
             status = self.status()
+        print('testError = '.format(self.error))
 
     def status(self):
         return self.system.get_objects_or_children_by_type('runningtestinfo')[0].get_attribute('runningTestStatus')
 
+    def error(self):
+        return self.system.get_objects_or_children_by_type('runningtestinfo')[0].get_attribute('testError')
+
 
 class AvlCluster(AvlObject):
     """ Represents Avalanche cluster. """
-
     pass
-
 
 class AvlClient(AvlCluster):
     """ Represents Avalanche client side. """
 
-    def __init__(self, **data):
-        super(self.__class__, self).__init__(**data)
-        self.associations = self.get_children('globalassociations.association', 'userbasedassociations.association')
+    @property
+    def associations(self):
+        return {a.name: a for a in self.get_objects_or_children_by_type('globalassociations.association',
+                                                                        'userbasedassociations.association')}
 
 
 class AvlServer(AvlCluster):
     """ Represents Avalanche server side. """
 
-    def __init__(self, **data):
-        super(self.__class__, self).__init__(**data)
-        self.associations = self.get_children('association')
+    @property
+    def associations(self):
+        return {a.name: a for a in self.get_objects_or_children_by_type('association')}
 
 
 class AvlAssociation(AvlObject):
@@ -101,7 +104,10 @@ class AvlAssociation(AvlObject):
         parent = self.parent.ref
         if self.association_type:
             parent += '.' + self.association_type
-        return self.api.create('association', parent, associated_interface=self.associated_interface)
+        avl_obj = self.api.create('association', parent, associated_interface=self.associated_interface)
+        self._data['objRef'] = avl_obj
+        self._data['name'] = self.get_name()
+        return avl_obj
 
     def get_name(self):
         return int(self.get_attribute('id')) + 1
