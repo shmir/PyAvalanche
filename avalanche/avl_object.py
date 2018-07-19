@@ -56,6 +56,9 @@ class AvlObject(TgnObject):
         else:
             return self.api.create(self.type, self.parent)
 
+    def delete(self):
+        self.api.delete(self.ref)
+
     def command(self, command, wait_after=0, **arguments):
         rc = self.api.perform(command, **arguments)
         time.sleep(wait_after)

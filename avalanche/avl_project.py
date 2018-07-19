@@ -14,10 +14,10 @@ class AvlProject(AvlObject):
         super(self.__class__, self).__init__(objType='project', **data)
         self.get_children('tests')
 
-    def new_test(self, name='Test', type_='deviceComplex'):
+    def new_test(self, name='Test', testtype='deviceComplex'):
         """ Create new test. """
 
-        test_ref = self.api.avl_command('createTest', project=self.ref, test=name, type=type_)
+        test_ref = self.api.avl_command('createTest', project=self.ref, test=name, type=testtype)
         AvlTest(parent=self, objRef=test_ref, name=name)
         return self.tests[name]
 
@@ -85,7 +85,9 @@ class AvlAssociation(AvlObject):
     """ Represents Avalanche association. """
 
     def __init__(self, **data):
+        self.associated_interface = data.pop('associated_interface', None)
         self.association_type = data.pop('association_type', None)
+        data['objType'] = 'association'
         super(self.__class__, self).__init__(**data)
         self.interface = self.get_child('associated_interface')
 
@@ -99,7 +101,7 @@ class AvlAssociation(AvlObject):
         parent = self.parent.ref
         if self.association_type:
             parent += '.' + self.association_type
-        return self.api.avl_command('create association', under=parent)
+        return self.api.create('association', parent, associated_interface=self.associated_interface)
 
     def get_name(self):
         return int(self.get_attribute('id')) + 1
@@ -126,19 +128,3 @@ class AvlInterface(AvlObject):
 
     def set_port(self, location):
         self.set_attributes(port=location)
-
-
-class AvlActionList(AvlObject):
-    """ Represents Avalanche action list object. """
-
-    def __init__(self, **data):
-        data['objType'] = 'actionlist'
-        super(self.__class__, self).__init__(**data)
-
-
-class AvlUserProfile(AvlObject):
-    """ Represents Avalanche user profile object. """
-
-    def __init__(self, **data):
-        data['objType'] = 'userprofile'
-        super(self.__class__, self).__init__(**data)

@@ -7,6 +7,7 @@ This module implements classes and utility functions to manage Avalanche applica
 from os import path
 from random import randint
 import shutil
+import time
 
 from trafficgenerator.tgn_app import TgnApp
 
@@ -55,7 +56,8 @@ class AvlApp(TgnApp):
         Login must be the first command.
         """
 
-        self.api.avl_command('login {}'.format(randint(0, 999)))
+        self.session_id = str(randint(0, 999))
+        self.api.avl_command('login {}'.format(self.session_id))
         self.hw = self.system.get_child('PhysicalChassisManager')
         self.connected = True
 
@@ -82,7 +84,7 @@ class AvlApp(TgnApp):
     def new_config(self):
         """ Create new, empty,  configuration. """
 
-        project_ref = self.api.avl_command('createProject', project='project1')
+        project_ref = self.api.avl_command('createProject', project='project{}'.format(self.session_id))
         self.project = AvlProject(parent=self.system, objRef=project_ref)
         self.project.project = self.project
 
@@ -92,8 +94,10 @@ class AvlApp(TgnApp):
         :param config_file_name: full path to the configuration file.
         """
 
-        self.api.perform('save ' + self.system.obj_ref())
-        self.api.perform('export ' + self.system.obj_ref(), projectsTestsHandles=self.project.obj_ref())
+        self.api.perform('save ' + self.project.ref)
+        self.api.perform('save ' + self.system.ref)
+        self.api.perform('export ' + self.system.obj_ref(), projectsTestsHandles=self.project.ref)
+        # The original copy of the exported file is erased from the export after logout.
         shutil.copy(self.system.get_attribute('latestExportedFile'), config_file_name)
 
 

@@ -47,11 +47,14 @@ class AvlTclWrapper(TgnTclWrapper):
 
         :param obj_type: object type.
         :param parent: object parent - object will be created under this parent.
+        :type parent: str or AvlObject
         :param attributes: additional attributes.
         :return: Avalanche object reference.
         """
 
-        return self.avl_command('create ' + obj_type, under=parent.ref, **attributes)
+        parent = parent if type(parent) is str else parent.ref
+        # Make sure -under is the first argument.
+        return self.avl_command('create {} -under {}'.format(obj_type, parent), **attributes)
 
     def delete(self, obj_ref):
         """ Delete the specified object.
