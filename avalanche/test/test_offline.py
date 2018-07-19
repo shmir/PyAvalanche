@@ -25,6 +25,7 @@ class AvlTestOffline(AvlTestBase):
         """ Create new configuration. """
         self.logger.info(AvlTestOffline.testNewConfig.__doc__.strip())
 
+        # Create project and test.
         self.avl.new_config()
         test = self.avl.project.new_test()
 
@@ -60,14 +61,26 @@ class AvlTestOffline(AvlTestBase):
                           'ipaddressranges.ipaddressrange': '{}.1-{}.100'.format(network, network)}
             subnet.set_attributes(**attributes)
 
+        # Set load.
+        test.client.set_attributes(loadProfile=self.avl.project.get_objects_by_type('load')[0])
+
+        # Create server transactions to match action lists.
+        for rate in ['1K', '10K', '100K']:
+            transaction = AvlObject(objType='transaction', parent=self.avl.project, name=rate)
+            transaction.set_attributes(bodyBytes=int(rate[:-1]) * 1024)
+
+        # Create server subnet.
+        subnet = AvlObject(objType='serversubnet', parent=self.avl.project, name='Net_Server')
+
         # Tie all under association.
         for i, association in enumerate(test.client.get_objects_by_type('association')):
             association.set_attributes(userActions=self.avl.project.get_objects_by_type('actionlist')[i].name,
                                        clientSubnet=self.avl.project.get_objects_by_type('clientsubnet')[i].name)
+        association = test.server.get_object_by_type('association')
+        association.set_attributes(serverSubnet=self.avl.project.get_object_by_type('serversubnet'),
+                                   ipAddressRange='192.168.1.1-192.168.1.3')
 
-        # Set load.
-        test.client.set_attributes(loadProfile=self.avl.project.get_objects_by_type('load')[0])
-
+        # Save configuration.
         self.avl.save_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
 
     def testAnalyzeConfig(self):
