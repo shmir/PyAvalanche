@@ -9,6 +9,7 @@ Two Avalanche ports connected back to back.
 
 from os import path
 import json
+import time
 
 from avalanche.avl_object import AvlObject
 from avalanche.avl_project import AvlAssociation, AvlInterface
@@ -34,7 +35,7 @@ class AvlTestOnline(AvlTestBase):
         """ Load configuration on ports and verify that ports are online. """
         self.logger.info(AvlTestOnline.test_reserve_ports.__doc__.strip())
 
-        self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
+        self.avl.load_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
         self._reserve_ports(self.config.get('Client', 'association_1'),
                             self.config.get('Server', 'association_1'))
         self.avl.project.tests['Test'].client.associations[1].interface.set_port(self.config.get('Client', 'association_1'))
@@ -122,30 +123,37 @@ class AvlTestOnline(AvlTestBase):
 
         # Create new configuration.
         self.test_new_config()
+        self.test_reserve_ports()
 
         # Reserve ports
-        self._reserve_ports('10.241.17.207/1/1', '10.241.17.207/1/2')
+        # self._reserve_ports('10.241.17.207/1/1', '10.241.17.207/1/2')
 
         # Assign ports to associations.
-        self.avl.project.tests['Test'].client.associations[1].interface.set_port('10.241.17.207/1/1')
-        self.avl.project.tests['Test'].server.associations[1].interface.set_port('10.241.17.207/1/2')
-
-        # Run test in blocking mode.
-        self.avl.project.tests['Test'].start(trial=True, blocking=True)
-
-        # Get statistics after run.
-        http_stats = AvlClientStats(self.avl.project, 'http')
-        simusers_stats = AvlClientStats(self.avl.project, 'simusers')
-        tcp_stats = AvlClientStats(self.avl.project, 'tcp')
-        http_stats.read_stats()
-        print(json.dumps(http_stats.statistics, indent=2))
-        simusers_stats.read_stats()
-        print(json.dumps(simusers_stats.statistics, indent=2))
-        tcp_stats.read_stats()
-        print(json.dumps(tcp_stats.statistics, indent=2))
+        # self.avl.project.tests['Test'].client.associations[1].interface.set_port('10.241.17.207/1/1')
+        # self.avl.project.tests['Test'].server.associations[1].interface.set_port('10.241.17.207/1/2')
 
         # Save configuration.
-        self.avl.save_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
+        # self.avl.save_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
+
+        # Subscribe to statistics.
+        # http_stats = AvlClientStats(self.avl.project, 'http')
+        simusers_stats = AvlClientStats(self.avl.project, 'simusers')
+        # tcp_stats = AvlClientStats(self.avl.project, 'tcp')
+
+        # Start test.
+        self.avl.project.tests['Test'].start(trial=True, blocking=False)
+        time.sleep(10)
+
+        # Get real time statistics.
+        # http_stats.read_stats()
+        # print(json.dumps(http_stats.statistics, indent=2))
+        simusers_stats.read_stats()
+        print(json.dumps(simusers_stats.statistics, indent=2))
+        # tcp_stats.read_stats()
+        # print(json.dumps(tcp_stats.statistics, indent=2))
+
+        # Wait.
+        self.avl.project.tests['Test'].wait()
 
     def test_run_stop(self):
         """ Load configuration on ports, run test and wait for test to complete. """

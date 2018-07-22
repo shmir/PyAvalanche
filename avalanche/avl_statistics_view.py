@@ -43,8 +43,8 @@ class AvlStats(object):
         """ Reads the statistics view from Avalanche and saves it in statistics dictionary. """
 
         resultdataobjects = self.rds.get_objects_or_children_by_type('resultdataobjects')[0]
-        self.statistics = resultdataobjects.get_attributes()
-
+        self.statistics = self.project.api.avl_command('perform getValues resultdataset1')
+        # self.statistics = resultdataobjects.get_attributes()
 
 class AvlClientStats(AvlStats):
 

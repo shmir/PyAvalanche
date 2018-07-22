@@ -4,6 +4,7 @@ Classes and utilities to manage Avalanche project.
 
 import time
 
+from trafficgenerator.tgn_utils import TgnError
 from avalanche.avl_object import AvlObject
 
 
@@ -54,7 +55,9 @@ class AvlTest(AvlObject):
         while status != 'TEST_COMPLETED':
             time.sleep(1)
             status = self.status()
-        print('testError = '.format(self.error))
+        error = self.error()
+        if error:
+            raise TgnError('Error while running test - {}'.format(error))
 
     def status(self):
         return self.system.get_objects_or_children_by_type('runningtestinfo')[0].get_attribute('runningTestStatus')
