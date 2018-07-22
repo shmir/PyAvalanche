@@ -136,24 +136,21 @@ class AvlTestOnline(AvlTestBase):
         # self.avl.save_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
 
         # Subscribe to statistics.
-        # http_stats = AvlClientStats(self.avl.project, 'http')
+        http_stats = AvlClientStats(self.avl.project, 'http')
         simusers_stats = AvlClientStats(self.avl.project, 'simusers')
-        # tcp_stats = AvlClientStats(self.avl.project, 'tcp')
+        tcp_stats = AvlClientStats(self.avl.project, 'tcp')
 
         # Start test.
-        self.avl.project.tests['Test'].start(trial=True, blocking=False)
-        time.sleep(10)
+        self.avl.project.tests['Test'].start(trial=True, blocking=True)
+        time.sleep(4)
 
-        # Get real time statistics.
-        # http_stats.read_stats()
-        # print(json.dumps(http_stats.statistics, indent=2))
+        # Get statistics.
+        http_stats.read_stats()
+        print(json.dumps(http_stats.statistics, indent=2))
         simusers_stats.read_stats()
         print(json.dumps(simusers_stats.statistics, indent=2))
-        # tcp_stats.read_stats()
-        # print(json.dumps(tcp_stats.statistics, indent=2))
-
-        # Wait.
-        self.avl.project.tests['Test'].wait()
+        tcp_stats.read_stats()
+        print(json.dumps(tcp_stats.statistics, indent=2))
 
     def test_run_stop(self):
         """ Load configuration on ports, run test and wait for test to complete. """

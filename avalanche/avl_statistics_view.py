@@ -31,8 +31,9 @@ class AvlStats(object):
         :param view: statistics view to subscribe to.
         """
 
-        rds = self.project.api.avl_command('subscribe', side, '{}*'.format(view))
+        rds = self.project.api.avl_command('subscribe', side, '"{}* all"'.format(view))
         self.rds = AvlObject(ObjType='ResultDataSet', parent=self.project, objRef=rds)
+#         self.rdo = self.rds.get_child('resultdataobjects')
 
     def unsubscribe(self):
         """ UnSubscribe from statistics view. """
@@ -42,9 +43,8 @@ class AvlStats(object):
     def read_stats(self):
         """ Reads the statistics view from Avalanche and saves it in statistics dictionary. """
 
-        resultdataobjects = self.rds.get_objects_or_children_by_type('resultdataobjects')[0]
-        self.statistics = self.project.api.avl_command('perform getValues resultdataset1')
-        # self.statistics = resultdataobjects.get_attributes()
+#         self.statistcs = self.rdo.get_attributes()
+        self.statistcs = self.project.api.avl_command('perform getValues {}'.format(self.rds.ref))
 
 class AvlClientStats(AvlStats):
 
