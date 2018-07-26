@@ -29,7 +29,7 @@ def init_avl(logger, tcl_lib_install_dir, avl_install_dir):
 
 
 class AvlApp(TgnApp):
-    """ TestCenter driver. Equivalent to TestCenter Application. """
+    """ Avalanche driver. Equivalent to Avalanche Application. """
 
     def __init__(self, logger, api_wrapper):
         """ Set all kinds of application level objects - logger, api, etc.
@@ -51,12 +51,15 @@ class AvlApp(TgnApp):
         self.project = None
         self.connected = False
 
-    def connect(self):
+    def connect(self, session_id=None):
         """ Login to Avalanche server.
+
         Login must be the first command.
+
+        :param session_id: existing session ID to connect to.
         """
 
-        self.session_id = str(randint(0, 999))
+        self.session_id = session_id if session_id else str(randint(0, 999))
         self.api.avl_command('login {}'.format(self.session_id))
         self.hw = self.system.get_child('PhysicalChassisManager')
         self.connected = True

@@ -35,7 +35,7 @@ class AvlTestOnline(AvlTestBase):
         """ Load configuration on ports and verify that ports are online. """
         self.logger.info(AvlTestOnline.test_reserve_ports.__doc__.strip())
 
-        self.avl.load_config(path.join(path.dirname(__file__), 'configs/new_test_config.spf'))
+        self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
         self._reserve_ports(self.config.get('Client', 'association_1'),
                             self.config.get('Server', 'association_1'))
         self.avl.project.tests['Test'].client.associations[1].interface.set_port(self.config.get('Client', 'association_1'))

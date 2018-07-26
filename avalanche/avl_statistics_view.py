@@ -2,6 +2,9 @@
 Classes and utilities to manage STC statistics views.
 """
 
+from collections import OrderedDict
+
+from trafficgenerator.tgn_tcl import tcl_list_2_py_list
 from avalanche.avl_object import AvlObject
 
 
@@ -22,7 +25,7 @@ class AvlStats(object):
         self.project = project
         if view:
             self.subscribe(side, view)
-        self.statistics = {}
+        self.statistics = OrderedDict()
 
     def subscribe(self, side, view):
         """ Subscribe to statistics view.
@@ -44,7 +47,12 @@ class AvlStats(object):
         """ Reads the statistics view from Avalanche and saves it in statistics dictionary. """
 
 #         self.statistcs = self.rdo.get_attributes()
-        self.statistcs = self.project.api.avl_command('perform getValues {}'.format(self.rds.ref))
+        raw_stats = self.project.api.avl_command('perform getValues {}'.format(self.rds.ref))
+        if raw_stats != '{Values {}}':
+            for timestamp_stats in tcl_list_2_py_list(raw_stats[9:-2]):
+                timestamp, stats = tcl_list_2_py_list(timestamp_stats)
+                self.statistics[timestamp] = tcl_list_2_py_list(stats)
+
 
 class AvlClientStats(AvlStats):
 
