@@ -1,5 +1,5 @@
 """
-Base classes and utilities to manage Spirent Test Center (STC).
+Base classes and utilities to manage Spirent Avalanche.
 
 :author: yoram@ignissoft.com
 """
@@ -12,7 +12,7 @@ from trafficgenerator.tgn_utils import TgnError
 from trafficgenerator.tgn_object import TgnObject
 
 
-def extract_stc_obj_type_from_obj_ref(obj_ref):
+def extract_avl_obj_type_from_obj_ref(obj_ref):
     # Extract object type from object reference. Note that there are rare cases where
     # object reference has no sequential number suffix like 'automationoptions'.
     m = re.search('(.*\D+)\d+', obj_ref)
@@ -28,7 +28,7 @@ class AvlObject(TgnObject):
             self.system = data['parent'].system
             self.project = data['parent'].project
         if 'objRef' in data:
-            data['objType'] = extract_stc_obj_type_from_obj_ref(data['objRef'])
+            data['objType'] = extract_avl_obj_type_from_obj_ref(data['objRef'])
             if 'parent' not in data:
                 self._data['objRef'] = data['objRef']
                 data['parent'] = self.get_object_from_attribute('parent')
@@ -119,7 +119,7 @@ class AvlObject(TgnObject):
         children_objs = OrderedDict()
         for child_type in types:
             output = self.get_attribute(child_type)
-            clean_child_type = extract_stc_obj_type_from_obj_ref(output.split(' ')[0])
+            clean_child_type = extract_avl_obj_type_from_obj_ref(output.split(' ')[0])
             children_objs.update(self._build_children_objs(clean_child_type, output.split(' ')))
         return list(children_objs.values())
 
