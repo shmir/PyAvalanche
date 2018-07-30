@@ -70,6 +70,7 @@ class AvlCluster(AvlObject):
     """ Represents Avalanche cluster. """
     pass
 
+
 class AvlClient(AvlCluster):
     """ Represents Avalanche client side. """
 

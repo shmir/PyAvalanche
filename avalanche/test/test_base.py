@@ -13,9 +13,6 @@ from avalanche.avl_app import init_avl
 
 class AvlTestBase(TgnTest):
 
-    tcl_interp = None
-    stc = None
-
     TgnTest.config_file = path.join(path.dirname(__file__), 'Avalanche.ini')
 
     def setUp(self):
@@ -26,8 +23,6 @@ class AvlTestBase(TgnTest):
     def tearDown(self):
         super(AvlTestBase, self).tearDown()
         self.avl.disconnect()
-        if self.tcl_interp:
-            self.tcl_interp.stop()
 
     def testHelloWorld(self):
         pass
