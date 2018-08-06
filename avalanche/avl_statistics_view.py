@@ -49,9 +49,10 @@ class AvlStats(object):
 #         self.statistcs = self.rdo.get_attributes()
         raw_stats = self.project.api.avl_command('perform getValues {}'.format(self.rds.ref))
         if raw_stats != '{Values {}}':
-            for timestamp_stats in tcl_list_2_py_list(raw_stats[9:-2]):
-                timestamp, stats = tcl_list_2_py_list(timestamp_stats)
-                self.statistics[timestamp] = tcl_list_2_py_list(stats)
+            for sample_num in tcl_list_2_py_list(raw_stats[9:-2]):
+                timestamp, stats = tcl_list_2_py_list(sample_num)
+                self.statistics[timestamp] = {key_val.split()[0]: key_val.split()[1] for
+                                              key_val in tcl_list_2_py_list(stats)}
 
 
 class AvlClientStats(AvlStats):
