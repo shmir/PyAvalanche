@@ -25,3 +25,10 @@ class AvlTestOffline(AvlTestBase):
 
         self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
         assert(len(self.avl.project.tests) == 3)
+
+        # Direct access with object references.
+        self.avl.api.get(self.avl.project.ref)
+        test = self.avl.api.get(self.avl.project.ref, 'tests').split(' ')[0]
+        name = self.avl.api.get(test, 'name')
+        self.avl.api.config(test, name=name + '_')
+        assert(self.avl.api.get(test, 'name') == name + '_')

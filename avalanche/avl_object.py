@@ -90,11 +90,6 @@ class AvlObject(TgnObject):
     def get_object_from_attribute(self, attribute):
         return self.get_objects_from_attribute(attribute)[0] if self.get_objects_from_attribute(attribute) else None
 
-    def append_attribute(self, attribute, value, apply_=False):
-        cur_value = self.api.get(self.obj_ref(), attribute)
-        attributes = {attribute: cur_value + ' ' + str(value)}
-        self.set_attributes(apply_=apply_, **attributes)
-
     def get_attributes(self, *attributes):
         """ Get multiple attributes values.
 
@@ -123,10 +118,8 @@ class AvlObject(TgnObject):
             children_objs.update(self._build_children_objs(clean_child_type, output.split(' ')))
         return list(children_objs.values())
 
-    def set_attributes(self, apply_=False, **attributes):
+    def set_attributes(self, **attributes):
         self.api.config(self.obj_ref(), **attributes)
-        if apply_:
-            self.api.apply()
 
     def set_active(self, active):
         self.set_attributes(Active=active)

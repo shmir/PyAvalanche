@@ -21,7 +21,8 @@ class AvlTclWrapper(TgnTclWrapper):
     def __init__(self, logger, tcl_lib_install_dir, avl_install_dir, tcl_interp=None):
         super(self.__class__, self).__init__(logger, tcl_interp)
         tcl_lib_85_dir = tcl_file_name(path.join(tcl_lib_install_dir, 'tcl8.5'))
-        self.eval('set auto_path [linsert $auto_path 0 {} {}]'.format(tcl_lib_install_dir, tcl_lib_85_dir))
+        self.eval('set auto_path [linsert $auto_path 0 {} {}]'.format(tcl_file_name(tcl_lib_install_dir),
+                                                                      tcl_lib_85_dir))
         self.eval('lappend auto_path ' + tcl_file_name(path.join(avl_install_dir, app_subdir)))
         self.eval('package forget av')
         self.ver = self.eval('package require av')
