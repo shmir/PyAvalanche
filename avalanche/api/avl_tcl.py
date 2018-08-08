@@ -9,10 +9,11 @@ from trafficgenerator.tgn_tcl import TgnTclWrapper, get_args_pairs, tcl_file_nam
 
 
 if platform == 'win32':
-    app_subdir = 'Layer 4-7 Application/TclAPI'
+    avl_tcl_subdir = 'Layer 4-7 Application/TclAPI'
+    stc_tcl_subdir = 'Spirent TestCenter Application/Tcl/lib/tcl8.5'
 else:
     # Not supported yet.
-    app_subdir = None
+    pass
 
 
 class AvlTclWrapper(TgnTclWrapper):
@@ -23,7 +24,8 @@ class AvlTclWrapper(TgnTclWrapper):
         tcl_lib_85_dir = tcl_file_name(path.join(tcl_lib_install_dir, 'tcl8.5'))
         self.eval('set auto_path [linsert $auto_path 0 {} {}]'.format(tcl_file_name(tcl_lib_install_dir),
                                                                       tcl_lib_85_dir))
-        self.eval('lappend auto_path ' + tcl_file_name(path.join(avl_install_dir, app_subdir)))
+        self.eval('lappend auto_path ' + tcl_file_name(path.join(avl_install_dir, avl_tcl_subdir)))
+        self.eval('lappend auto_path ' + tcl_file_name(path.join(avl_install_dir, stc_tcl_subdir)))
         self.eval('package forget av')
         self.ver = self.eval('package require av')
 
