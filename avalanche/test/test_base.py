@@ -6,23 +6,23 @@ Base class for all Avalanche package tests.
 
 from os import path
 
-from trafficgenerator.test.test_tgn import TgnTest
+from trafficgenerator.test.test_tgn import TestTgnBase
 
 from avalanche.avl_app import init_avl
 
 
-class AvlTestBase(TgnTest):
+class TestAvlBase(TestTgnBase):
 
-    TgnTest.config_file = path.join(path.dirname(__file__), 'Avalanche.ini')
+    TestTgnBase.config_file = path.join(path.dirname(__file__), 'Avalanche.ini')
 
-    def setUp(self):
-        super(AvlTestBase, self).setUp()
+    def setup(self):
+        super(TestAvlBase, self).setup()
         self.avl = init_avl(self.logger, self.config.get('Tcl', 'install_dir'), self.config.get('AVL', 'install_dir'))
         self.avl.connect()
 
-    def tearDown(self):
-        super(AvlTestBase, self).tearDown()
+    def teardown(self):
+        super(TestAvlBase, self).teardown()
         self.avl.disconnect()
 
-    def testHelloWorld(self):
+    def test_hello_world(self):
         pass

@@ -14,16 +14,16 @@ import time
 from avalanche.avl_object import AvlObject
 from avalanche.avl_project import AvlAssociation, AvlInterface
 from avalanche.avl_statistics_view import AvlClientStats
-from avalanche.test.test_base import AvlTestBase
+from avalanche.test.test_base import TestAvlBase
 
 
-class AvlTestOnline(AvlTestBase):
+class TestAvlOnline(TestAvlBase):
 
     ports = []
 
     def test_inventory(self):
         """ Get chassis inventory. """
-        self.logger.info(AvlTestOnline.test_inventory.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_inventory.__doc__.strip())
 
         ip, module, port = self.config.get('Client', 'association_1').split('/')
         chassis = self.avl.hw.get_chassis(ip)
@@ -33,7 +33,7 @@ class AvlTestOnline(AvlTestBase):
 
     def test_reserve_ports(self):
         """ Load configuration on ports and verify that ports are online. """
-        self.logger.info(AvlTestOnline.test_reserve_ports.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_reserve_ports.__doc__.strip())
 
         self.avl.load_config(path.join(path.dirname(__file__), 'configs/test_config.spf'))
         self._reserve_ports(self.config.get('Client', 'association_1'),
@@ -43,7 +43,7 @@ class AvlTestOnline(AvlTestBase):
 
     def test_run_wait(self):
         """ Load configuration on ports, run test and wait for test to complete. """
-        self.logger.info(AvlTestOnline.test_run_wait.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_run_wait.__doc__.strip())
 
         self.test_reserve_ports()
 
@@ -56,7 +56,7 @@ class AvlTestOnline(AvlTestBase):
 
     def test_new_config(self):
         """ Create new configuration. """
-        self.logger.info(AvlTestOnline.test_new_config.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_new_config.__doc__.strip())
 
         # Create project and test.
         self.avl.new_config()
@@ -119,7 +119,7 @@ class AvlTestOnline(AvlTestBase):
 
     def test_build_and_run(self):
         """ Build configuration, attach ports, run test and wait for test to complete. """
-        self.logger.info(AvlTestOnline.test_build_and_run.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_build_and_run.__doc__.strip())
 
         # Create new configuration.
         self.test_new_config()
@@ -154,7 +154,7 @@ class AvlTestOnline(AvlTestBase):
 
     def test_run_stop(self):
         """ Load configuration on ports, run test and wait for test to complete. """
-        self.logger.info(AvlTestOnline.test_run_stop.__doc__.strip())
+        self.logger.info(TestAvlOnline.test_run_stop.__doc__.strip())
 
         self.test_reserve_ports()
         self.avl.project.tests['Test'].start(trial=True)
